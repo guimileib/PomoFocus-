@@ -324,14 +324,21 @@ export default function App() {
   const togglePlay = () => setIsPlaying(!isPlaying);
 
   useEffect(() => {
-    if (youtubePlayerRef.current && youtubePlayerRef.current.contentWindow) {
-      const command = isPlaying ? 'playVideo' : 'pauseVideo';
-      youtubePlayerRef.current.contentWindow.postMessage(
-        JSON.stringify({ event: 'command', func: command, args: '' }),
-        '*'
-      );
+    const sendCommand = (func: string, args: any[] = []) => {
+      if (youtubePlayerRef.current && youtubePlayerRef.current.contentWindow) {
+        youtubePlayerRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: 'command', func, args }),
+          '*'
+        );
+      }
+    };
+
+    if (isPlaying) {
+      sendCommand('playVideo');
+    } else {
+      sendCommand('pauseVideo');
     }
-  }, [isPlaying]);
+  }, [isPlaying, currentTrack.youtubeId]); // Also trigger on track change to ensure it plays if isPlaying is true
 
   useEffect(() => {
     if (youtubePlayerRef.current && youtubePlayerRef.current.contentWindow) {
@@ -343,7 +350,7 @@ export default function App() {
     if (atmosphereAudioRef.current) {
       atmosphereAudioRef.current.volume = volume / 100;
     }
-  }, [volume]);
+  }, [volume, currentTrack.youtubeId]); // Ensure volume is set when track changes
 
   useEffect(() => {
     if (atmosphereAudioRef.current) {
@@ -359,7 +366,7 @@ export default function App() {
     switch (id) {
       case 'rain': return 'https://www.soundjay.com/nature/rain-01.mp3';
       case 'coffee': return 'https://www.soundjay.com/ambient/coffee-shop-1.mp3';
-      case 'lofi': return null;
+      case 'lofi': return 'https://www.soundjay.com/ambient/vinyl-crackle-01.mp3';
       case 'white-noise': return 'https://www.soundjay.com/ambient/white-noise-01.mp3';
       default: return null;
     }
@@ -1261,7 +1268,7 @@ export default function App() {
               ref={youtubePlayerRef}
               width="100" 
               height="100" 
-              src={`https://www.youtube.com/embed/${currentTrack.youtubeId}?enablejsapi=1&autoplay=${isPlaying ? '1' : '0'}&controls=0&disablekb=1&fs=0&modestbranding=1&iv_load_policy=3`}
+              src={`https://www.youtube.com/embed/${currentTrack.youtubeId}?enablejsapi=1&autoplay=${isPlaying ? '1' : '0'}&controls=0&disablekb=1&fs=0&modestbranding=1&iv_load_policy=3&origin=${window.location.origin}`}
               title="YouTube background player" 
               frameBorder="0" 
               allow="autoplay"
