@@ -66,29 +66,7 @@ export const TRACKS: Track[] = [
   }
 ];
 
-export const INITIAL_TASKS: Task[] = [
-  {
-    id: '1',
-    title: 'Study Engineering',
-    description: 'Review Thermodynamics Ch. 4',
-    status: 'pending',
-    icon: 'BookOpen',
-  },
-  {
-    id: '2',
-    title: 'Design UI Mockups',
-    description: 'Finalize the desktop view layout',
-    status: 'pending',
-    icon: 'Brush',
-  },
-  {
-    id: '3',
-    title: 'Morning Meditation',
-    description: '15 minutes mindfulness',
-    status: 'completed',
-    icon: 'Check',
-  },
-];
+export const INITIAL_TASKS: Task[] = [];
 
 export const ATMOSPHERES: Atmosphere[] = [
   { id: 'rain', name: 'Rain', icon: 'CloudRain' },

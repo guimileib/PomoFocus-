@@ -82,9 +82,10 @@ export default function App() {
   const [focusTime, setFocusTime] = useState(0); // in seconds
   const [completedSessions, setCompletedSessions] = useState(0);
   const [language, setLanguage] = useState<'en' | 'pt'>('en');
-  const [userPhoto, setUserPhoto] = useState('https://picsum.photos/seed/user/100/100');
+  const [userPhoto, setUserPhoto] = useState('https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y');
   const [tempPhoto, setTempPhoto] = useState<string | null>(null);
-  const [userName, setUserName] = useState(() => getCookie('user_name') || 'Alex');
+  const [userName, setUserName] = useState(() => getCookie('user_name') || '');
+  const [isOnboarding, setIsOnboarding] = useState(!getCookie('user_name'));
   const [selectedTaskId, setSelectedTaskId] = useState<string>('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAddMusicModalOpen, setIsAddMusicModalOpen] = useState(false);
@@ -94,10 +95,7 @@ export default function App() {
   const atmosphereAudioRef = useRef<HTMLAudioElement>(null);
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<{id: string, text: string, time: string}[]>([
-    { id: '1', text: 'Welcome to PomoFocus!', time: 'Just now' },
-    { id: '2', text: 'Don\'t forget to stay hydrated.', time: '5m ago' }
-  ]);
+  const [notifications, setNotifications] = useState<{id: string, text: string, time: string}[]>([]);
   const notificationAudioRef = useRef<HTMLAudioElement>(null);
 
   const activeTask = tasks.find(t => t.id === selectedTaskId);
@@ -174,7 +172,11 @@ export default function App() {
       restTimeRemaining: "Rest Time Remaining",
       notifications: "Notifications",
       clearAll: "Clear all",
-      noNotifications: "No new notifications"
+      noNotifications: "No new notifications",
+      welcome: "Welcome to PomoFocus",
+      onboardingDesc: "Let's start by getting to know you. What's your name?",
+      getStarted: "Get Started",
+      enterName: "Enter your name..."
     },
     pt: {
       goodMorning: "Bom Dia,",
@@ -217,7 +219,11 @@ export default function App() {
       restTimeRemaining: "Tempo de Descanso Restante",
       notifications: "Notificações",
       clearAll: "Limpar tudo",
-      noNotifications: "Sem novas notificações"
+      noNotifications: "Sem novas notificações",
+      welcome: "Bem-vindo ao PomoFocus",
+      onboardingDesc: "Vamos começar nos conhecendo. Qual é o seu nome?",
+      getStarted: "Começar",
+      enterName: "Digite seu nome..."
     }
   }[language];
 
@@ -400,6 +406,72 @@ export default function App() {
 
   return (
     <div className="flex h-screen w-full bg-bg-light overflow-hidden">
+      <AnimatePresence>
+        {isOnboarding && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-bg-light flex items-center justify-center p-6"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="max-w-md w-full bg-white rounded-[40px] shadow-2xl p-10 flex flex-col items-center text-center gap-8 border border-black/5 relative"
+            >
+              <div className="absolute top-6 right-6 flex gap-2">
+                <button 
+                  onClick={() => setLanguage('en')}
+                  className={`text-xs font-bold px-2 py-1 rounded-md transition ${language === 'en' ? 'bg-primary text-text-main' : 'text-text-muted hover:bg-black/5'}`}
+                >
+                  EN
+                </button>
+                <button 
+                  onClick={() => setLanguage('pt')}
+                  className={`text-xs font-bold px-2 py-1 rounded-md transition ${language === 'pt' ? 'bg-primary text-text-main' : 'text-text-muted hover:bg-black/5'}`}
+                >
+                  PT
+                </button>
+              </div>
+              <div className="size-20 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                <TimerIcon className="size-10 text-text-main" />
+              </div>
+              <div className="flex flex-col gap-3">
+                <h1 className="text-3xl font-black tracking-tight text-text-main">{t.welcome}</h1>
+                <p className="text-text-muted font-medium leading-relaxed">{t.onboardingDesc}</p>
+              </div>
+              <div className="w-full flex flex-col gap-4">
+                <input 
+                  type="text" 
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  placeholder={t.enterName}
+                  className="w-full px-6 py-4 rounded-2xl bg-bg-light border border-black/5 focus:outline-none focus:ring-2 focus:ring-primary/50 text-lg font-bold text-text-main placeholder:text-text-muted/50"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && userName.trim()) {
+                      handleNameChange(userName);
+                      setIsOnboarding(false);
+                    }
+                  }}
+                />
+                <button 
+                  onClick={() => {
+                    if (userName.trim()) {
+                      handleNameChange(userName);
+                      setIsOnboarding(false);
+                    }
+                  }}
+                  disabled={!userName.trim()}
+                  className="w-full py-4 rounded-2xl bg-primary text-text-main font-black text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
+                >
+                  {t.getStarted}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
       <aside className="w-80 h-full flex flex-col justify-between bg-white border-r border-black/5 p-6 hidden md:flex z-20">
         <div>
