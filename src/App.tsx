@@ -96,7 +96,15 @@ export default function App() {
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<{id: string, text: string, time: string}[]>([]);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const notificationAudioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const activeTask = tasks.find(t => t.id === selectedTaskId);
   const styles = ['All', ...Array.from(new Set(musicTracks.map(t => t.style).filter(Boolean)))];
@@ -133,6 +141,8 @@ export default function App() {
   const t = {
     en: {
       goodMorning: "Good Morning,",
+      goodAfternoon: "Good Afternoon,",
+      goodEvening: "Good Evening,",
       tasksPending: "Tasks Pending",
       focusTime: "Focus Time",
       sessions: "Sessions",
@@ -180,6 +190,8 @@ export default function App() {
     },
     pt: {
       goodMorning: "Bom Dia,",
+      goodAfternoon: "Boa Tarde,",
+      goodEvening: "Boa Noite,",
       tasksPending: "Tarefas Pendentes",
       focusTime: "Tempo de Foco",
       sessions: "Sessões",
@@ -228,6 +240,24 @@ export default function App() {
   }[language];
 
   const pendingTasksCount = tasks.filter(t => t.status === 'pending').length;
+
+  const getGreeting = () => {
+    const hour = currentTime.getHours();
+    if (hour < 12) return t.goodMorning;
+    if (hour < 18) return t.goodAfternoon;
+    return t.goodEvening;
+  };
+
+  const formatDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      month: 'short', 
+      day: 'numeric' 
+    };
+    const formatted = date.toLocaleDateString(language === 'en' ? 'en-US' : 'pt-BR', options);
+    // Capitalize first letter
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  };
 
   const formatFocusTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
@@ -565,9 +595,9 @@ export default function App() {
             >
               <header className="flex justify-between items-end">
                 <div className="flex flex-col gap-1">
-                  <h2 className="text-text-muted text-lg font-medium">{t.goodMorning}</h2>
+                  <h2 className="text-text-muted text-lg font-medium">{getGreeting()}</h2>
                   <h1 className="text-4xl md:text-5xl font-black tracking-tight">{userName}</h1>
-                  <p className="text-text-muted mt-2 font-medium">Tuesday, Oct 24</p>
+                  <p className="text-text-muted mt-2 font-medium">{formatDate(currentTime)}</p>
                 </div>
                 <div className="flex items-center gap-2 relative">
                   <button 
